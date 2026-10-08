@@ -41,7 +41,7 @@ function HotelDetails() {
             try {
 
                 const response = await fetch(
-                    `http://hotel-management-system-1q31.onrender.com/api/hotels/${id}`
+                    `https://hotel-management-system-1q31.onrender.com/api/hotels/${id}`
                 );
 
 
@@ -220,7 +220,7 @@ function HotelDetails() {
     // Hotel image
 
     const imageUrl = hotel.image
-        ? `http://hotel-management-system-1q31.onrender.com/uploads/${hotel.image}`
+        ? `https://hotel-management-system-1q31.onrender.com/uploads/${hotel.image}`
         : null;
 
 
