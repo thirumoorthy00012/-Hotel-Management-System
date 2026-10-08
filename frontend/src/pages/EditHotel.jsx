@@ -18,7 +18,7 @@ function EditHotel() {
             try {
 
                 const response = await fetch(
-                    `https://hotel-management-system-1q31.onrender.com/api/hotels/${id}`
+                    `https://hotel-management-system-1qjl.onrender.com/api/hotels/${id}`
                 );
 
                 const data = await response.json();

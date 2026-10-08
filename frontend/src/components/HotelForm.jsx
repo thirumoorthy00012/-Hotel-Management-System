@@ -236,8 +236,8 @@ function HotelForm({
             // =================================
 
             const url = isEdit
-                ? `https://hotel-management-system-1q31.onrender.com/api/hotels/${hotel.id}`
-                : "https://hotel-management-system-1q31.onrender.com/api/hotels";
+                ? `https://hotel-management-system-1qjl.onrender.com/api/hotels/${hotel.id}`
+                : "https://hotel-management-system-1qjl.onrender.com/api/hotels";
 
 
             // =================================
