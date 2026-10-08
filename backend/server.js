@@ -23,7 +23,8 @@ app.get("/", async (req, res) => {
         res.status(500).json({message:"Database connection failed"});
    }
 });
-const PORT=process.env.PORT||5000;
-app.listen(PORT,"0.0.0.0",()=>{
+const initDatabase = async () => { try { await pool.query("CREATE TABLE IF NOT EXISTS hotels (id SERIAL PRIMARY KEY, image VARCHAR(255), title VARCHAR(150) NOT NULL, description TEXT, latitude DECIMAL(10,7) NOT NULL, longitude DECIMAL(10,7) NOT NULL, price DECIMAL(10,2) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"); console.log("Hotels table ready"); } catch (error) { console.error("Database initialization error:", error); } };`r`nconst PORT=process.env.PORT||5000;
+initDatabase();`r`napp.listen(PORT,"0.0.0.0",()=>{
     console.log(`Server is running on port ${PORT}`);
 });
+
