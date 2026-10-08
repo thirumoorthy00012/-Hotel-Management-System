@@ -5,7 +5,7 @@ function HotelCard({ hotel, onDelete }) {
     const navigate = useNavigate();
 
     const imageUrl = hotel.image
-        ? `http://localhost:5000/uploads/${hotel.image}`
+        ? `http://hotel-management-system-1q31.onrender.com/uploads/${hotel.image}`
         : null;
 
     return (

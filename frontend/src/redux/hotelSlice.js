@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 
 const API_URL =
-    "http://localhost:5000/api/hotels";
+    "http://hotel-management-system-1q31.onrender.com/api/hotels";
 
 
 //get hotels//

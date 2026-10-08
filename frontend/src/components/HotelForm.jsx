@@ -50,7 +50,7 @@ function HotelForm({
             if (hotel.image) {
 
                 setPreview(
-                    `http://localhost:5000/uploads/${hotel.image}`
+                    `http://hotel-management-system-1q31.onrender.com/uploads/${hotel.image}`
                 );
 
             }
@@ -236,8 +236,8 @@ function HotelForm({
             // =================================
 
             const url = isEdit
-                ? `http://localhost:5000/api/hotels/${hotel.id}`
-                : "http://localhost:5000/api/hotels";
+                ? `http://hotel-management-system-1q31.onrender.com/api/hotels/${hotel.id}`
+                : "http://hotel-management-system-1q31.onrender.com/api/hotels";
 
 
             // =================================
