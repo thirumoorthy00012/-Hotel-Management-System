@@ -2,13 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
-function HotelForm({
-    hotel = null,
-    isEdit = false
-}) {
-
+function HotelForm({ hotel = null, isEdit = false }) {
     const navigate = useNavigate();
-
 
     const [formData, setFormData] = useState({
         title: "",
@@ -18,265 +13,136 @@ function HotelForm({
         price: ""
     });
 
-
     const [image, setImage] = useState(null);
-
     const [preview, setPreview] = useState(null);
-
     const [error, setError] = useState("");
-
     const [loading, setLoading] = useState(false);
-
-    // Success popup
-    const [successMessage, setSuccessMessage] =
-        useState("");
-
-
-   //load existing hotel data into the form when editing
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
-
         if (hotel) {
-
             setFormData({
                 title: hotel.title || "",
                 description: hotel.description || "",
-                latitude: hotel.latitude || "",
-                longitude: hotel.longitude || "",
-                price: hotel.price || ""
+                latitude: hotel.latitude ?? "",
+                longitude: hotel.longitude ?? "",
+                price: hotel.price ?? ""
             });
 
-
             if (hotel.image) {
+                const imageUrl = hotel.image.startsWith("http")
+                    ? hotel.image
+                    : `https://hotel-management-system-1qjl.onrender.com/uploads/${hotel.image}`;
 
-                setPreview(
-                    `https://hotel-management-system-1qjl.onrender.com/uploads/${hotel.image}`
-                );
-
+                setPreview(imageUrl);
+            } else {
+                setPreview(null);
             }
-
         }
-
     }, [hotel]);
 
-
-    // =====================================
-    // INPUT CHANGE
-    // =====================================
-
     const handleChange = (e) => {
+        const { name, value } = e.target;
 
-        const {
-            name,
-            value
-        } = e.target;
-
-
-        setFormData({
-            ...formData,
+        setFormData((previousData) => ({
+            ...previousData,
             [name]: value
-        });
-
+        }));
     };
 
-
-    // =====================================
-    // IMAGE CHANGE
-    // =====================================
-
     const handleImageChange = (e) => {
-
         const file = e.target.files[0];
-
 
         if (!file) {
             return;
         }
 
-
-        setImage(file);
-
-
-        setPreview(
-            URL.createObjectURL(file)
-        );
-
-    };
-
-
-    // =====================================
-    // SUBMIT
-    // =====================================
-
-    const handleSubmit = async (e) => {
-
-        e.preventDefault();
-
+        if (!file.type.startsWith("image/")) {
+            setError("Please select a valid image file.");
+            return;
+        }
 
         setError("");
+        setImage(file);
+        setPreview(URL.createObjectURL(file));
+    };
 
-
-
-        // =================================
-        // VALIDATION
-        // =================================
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccessMessage("");
 
         if (!formData.title.trim()) {
-
-            setError(
-                "Please enter hotel title."
-            );
-
+            setError("Please enter hotel title.");
             return;
         }
-
 
         if (!formData.description.trim()) {
-
-            setError(
-                "Please enter hotel description."
-            );
-
+            setError("Please enter hotel description.");
             return;
         }
 
-
-        if (!formData.latitude) {
-
-            setError(
-                "Please enter latitude."
-            );
-
+        if (
+            formData.latitude === "" ||
+            !Number.isFinite(Number(formData.latitude)) ||
+            Number(formData.latitude) < -90 ||
+            Number(formData.latitude) > 90
+        ) {
+            setError("Please enter a valid latitude between -90 and 90.");
             return;
         }
 
-
-        if (!formData.longitude) {
-
-            setError(
-                "Please enter longitude."
-            );
-
+        if (
+            formData.longitude === "" ||
+            !Number.isFinite(Number(formData.longitude)) ||
+            Number(formData.longitude) < -180 ||
+            Number(formData.longitude) > 180
+        ) {
+            setError("Please enter a valid longitude between -180 and 180.");
             return;
         }
 
-
-        if (!formData.price) {
-
-            setError(
-                "Please enter hotel price."
-            );
-
+        if (
+            formData.price === "" ||
+            !Number.isFinite(Number(formData.price)) ||
+            Number(formData.price) <= 0
+        ) {
+            setError("Price must be greater than 0.");
             return;
         }
-
-
-        if (Number(formData.price) <= 0) {
-
-            setError(
-                "Price must be greater than 0."
-            );
-
-            return;
-        }
-
-
 
         try {
-
             setLoading(true);
-
 
             const data = new FormData();
 
-
-            data.append(
-                "title",
-                formData.title
-            );
-
-
-            data.append(
-                "description",
-                formData.description
-            );
-
-
-            data.append(
-                "latitude",
-                formData.latitude
-            );
-
-
-            data.append(
-                "longitude",
-                formData.longitude
-            );
-
-
-            data.append(
-                "price",
-                formData.price
-            );
-
+            data.append("title", formData.title.trim());
+            data.append("description", formData.description.trim());
+            data.append("latitude", formData.latitude);
+            data.append("longitude", formData.longitude);
+            data.append("price", formData.price);
 
             if (image) {
-
-                data.append(
-                    "image",
-                    image
-                );
-
+                data.append("image", image);
             }
 
-
-
-            // =================================
-            // URL
-            // =================================
+            const baseUrl =
+                "https://hotel-management-system-1qjl.onrender.com/api/hotels";
 
             const url = isEdit
-                ? `https://hotel-management-system-1qjl.onrender.com/api/hotels/${hotel.id}`
-                : "https://hotel-management-system-1qjl.onrender.com/api/hotels";
+                ? `${baseUrl}/${hotel.id}`
+                : baseUrl;
 
+            const response = await fetch(url, {
+                method: isEdit ? "PUT" : "POST",
+                body: data
+            });
 
-            // =================================
-            // METHOD
-            // =================================
-
-            const method = isEdit
-                ? "PUT"
-                : "POST";
-
-
-
-            const response = await fetch(
-                url,
-                {
-                    method: method,
-                    body: data
-                }
-            );
-
-
-            const result =
-                await response.json();
-
+            const result = await response.json();
 
             if (!response.ok) {
-
-                throw new Error(
-                    result.message ||
-                    "Request failed"
-                );
-
+                throw new Error(result.message || "Request failed.");
             }
-
-
-
-            // =================================
-            // SUCCESS POPUP
-            // =================================
 
             setSuccessMessage(
                 isEdit
@@ -284,51 +150,24 @@ function HotelForm({
                     : "Hotel added successfully!"
             );
 
-
-
-            // =================================
-            // GO TO HOTEL LIST
-            // =================================
-
             setTimeout(() => {
-
                 navigate("/");
-
             }, 1500);
-
-
         } catch (error) {
-
-            setError(
-                error.message
-            );
-
+            setError(error.message || "Something went wrong.");
         } finally {
-
             setLoading(false);
-
         }
-
     };
 
-
-
     return (
-
         <div className="form-page">
-
-
-            {/* SEO */}
-
             <Helmet>
-
                 <title>
                     {isEdit
                         ? "Edit Hotel | Hotel Management System"
-                        : "Add Hotel | Hotel Management System"
-                    }
+                        : "Add Hotel | Hotel Management System"}
                 </title>
-
 
                 <meta
                     name="description"
@@ -338,262 +177,130 @@ function HotelForm({
                             : "Add a new hotel to the hotel management system."
                     }
                 />
-
             </Helmet>
 
-
-
-            {/* PAGE TITLE */}
-
-            <h1>
-
-                {isEdit
-                    ? "Edit Hotel"
-                    : "Add Hotel"
-                }
-
-            </h1>
-
-
-
-            {/* SUCCESS POPUP */}
+            <h1>{isEdit ? "Edit Hotel" : "Add Hotel"}</h1>
 
             {successMessage && (
-
                 <div className="success-popup">
-
                     {successMessage}
-
                 </div>
-
             )}
-
-
-
-            {/* ERROR */}
 
             {error && (
-
                 <p className="form-error">
-
                     {error}
-
                 </p>
-
             )}
 
-
-
-            {/* FORM */}
-
-            <form
-                className="hotel-form"
-                onSubmit={handleSubmit}
-            >
-
-
-                {/* IMAGE */}
-
+            <form className="hotel-form" onSubmit={handleSubmit}>
                 <div className="form-group">
-
-                    <label>
-                        Hotel Image
-                    </label>
-
+                    <label htmlFor="image">Hotel Image</label>
 
                     <input
+                        id="image"
                         type="file"
-                        accept="image/*"
-                        onChange={
-                            handleImageChange
-                        }
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handleImageChange}
                     />
-
                 </div>
-
-
-
-                {/* IMAGE PREVIEW */}
 
                 {preview && (
-
                     <div className="image-preview">
-
                         <img
                             src={preview}
-                            alt={
-                                formData.title ||
-                                "Hotel preview"
-                            }
+                            alt={formData.title || "Hotel preview"}
+                            onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                            }}
                         />
-
                     </div>
-
                 )}
 
-
-
-                {/* TITLE */}
-
                 <div className="form-group">
-
-                    <label>
-                        Title
-                    </label>
-
+                    <label htmlFor="title">Title</label>
 
                     <input
+                        id="title"
                         type="text"
                         name="title"
-                        value={
-                            formData.title
-                        }
-                        onChange={
-                            handleChange
-                        }
+                        value={formData.title}
+                        onChange={handleChange}
                         placeholder="Enter hotel title"
                     />
-
                 </div>
 
-
-
-                {/* DESCRIPTION */}
-
                 <div className="form-group">
-
-                    <label>
-                        Description
-                    </label>
-
+                    <label htmlFor="description">Description</label>
 
                     <textarea
+                        id="description"
                         name="description"
-                        value={
-                            formData.description
-                        }
-                        onChange={
-                            handleChange
-                        }
+                        value={formData.description}
+                        onChange={handleChange}
                         placeholder="Enter hotel description"
                         rows="5"
                     />
-
                 </div>
 
-
-
-                {/* LATITUDE */}
-
                 <div className="form-group">
-
-                    <label>
-                        Latitude
-                    </label>
-
+                    <label htmlFor="latitude">Latitude</label>
 
                     <input
+                        id="latitude"
                         type="number"
                         step="any"
                         name="latitude"
-                        value={
-                            formData.latitude
-                        }
-                        onChange={
-                            handleChange
-                        }
+                        value={formData.latitude}
+                        onChange={handleChange}
                         placeholder="Example: 11.0168"
                     />
-
                 </div>
 
-
-
-                {/* LONGITUDE */}
-
                 <div className="form-group">
-
-                    <label>
-                        Longitude
-                    </label>
-
+                    <label htmlFor="longitude">Longitude</label>
 
                     <input
+                        id="longitude"
                         type="number"
                         step="any"
                         name="longitude"
-                        value={
-                            formData.longitude
-                        }
-                        onChange={
-                            handleChange
-                        }
+                        value={formData.longitude}
+                        onChange={handleChange}
                         placeholder="Example: 76.9558"
                     />
-
                 </div>
 
-
-
-                {/* PRICE */}
-
                 <div className="form-group">
-
-                    <label>
-                        Price
-                    </label>
-
+                    <label htmlFor="price">Price</label>
 
                     <input
+                        id="price"
                         type="number"
                         step="0.01"
                         name="price"
-                        value={
-                            formData.price
-                        }
-                        onChange={
-                            handleChange
-                        }
+                        value={formData.price}
+                        onChange={handleChange}
                         placeholder="Enter hotel price"
                     />
-
                 </div>
-
-
-
-                {/* SUBMIT */}
 
                 <button
                     type="submit"
                     className="submit-btn"
                     disabled={loading}
                 >
-
                     {loading
-
-                        ? (
-                            isEdit
-                                ? "Updating Hotel..."
-                                : "Adding Hotel..."
-                        )
-
-                        : (
-                            isEdit
-                                ? "Update Hotel"
-                                : "Add Hotel"
-                        )
-
-                    }
-
+                        ? isEdit
+                            ? "Updating Hotel..."
+                            : "Adding Hotel..."
+                        : isEdit
+                            ? "Update Hotel"
+                            : "Add Hotel"}
                 </button>
-
-
             </form>
-
         </div>
-
     );
 }
-
 
 export default HotelForm;
