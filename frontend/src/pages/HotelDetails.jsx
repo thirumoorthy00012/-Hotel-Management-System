@@ -220,7 +220,7 @@ function HotelDetails() {
     // Hotel image
 
     const imageUrl = hotel.image
-        ? `https://hotel-management-system-1q31.onrender.com/uploads/${hotel.image}`
+        ? `https://hotel-management-system-1qjl.onrender.com/uploads/${hotel.image}`
         : null;
 
 

@@ -50,7 +50,7 @@ function HotelForm({
             if (hotel.image) {
 
                 setPreview(
-                    `https://hotel-management-system-1q31.onrender.com/uploads/${hotel.image}`
+                    `https://hotel-management-system-1qjl.onrender.com/uploads/${hotel.image}`
                 );
 
             }
